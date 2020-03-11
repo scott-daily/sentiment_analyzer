@@ -5,8 +5,8 @@ from transformers import AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
 model = AutoModelForSequenceClassification.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
-nlp_stars = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
+nlp_stars_sentiment = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
 
-score_dict = nlp_stars("I loved that pizza.")
+score_dict = nlp_stars_sentiment("I loved that pizza.")
 
 print(score_dict[0])
