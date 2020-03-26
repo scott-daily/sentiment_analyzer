@@ -14,8 +14,20 @@ nlp_stars_sentiment = pipeline('sentiment-analysis', model=model, tokenizer=toke
 
 reddit = praw.Reddit('sentimentBot')
 
+all = reddit.subreddit("all")
+amazon_reviews = reddit.subreddit("amazonreviews")
 
-for submission in reddit.subreddit('coronavirus').hot(limit=10):
+for submission in amazon_reviews.new(limit=3):
+    print("title:" + submission.title)
+    submission.comments.replace_more()
+    for comment in submission.comments.list():
+        print("Comment Body: " + comment.body)
+        print(nlp_stars_sentiment(comment.body))
+
+print(nlp_stars_sentiment("The tire shop was great.  The service was very helpful.  I did not like that I had to wait a little long, but overall it was good."))
+
+
+'''for submission in reddit.subreddit('all').hot(limit=10):
     submission_dict = nlp_stars_sentiment(submission.title)
     print(submission.title)
-    print(submission_dict[0])
+    print(submission_dict[0])'''
