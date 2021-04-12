@@ -1,33 +1,31 @@
-import transformers
-from transformers import pipeline
-from transformers import AutoModelForSequenceClassification
-from transformers import AutoTokenizer
+
 import praw
-
-tokenizer = AutoTokenizer.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
-model = AutoModelForSequenceClassification.from_pretrained("bert-base-cased")
-nlp_stars_sentiment = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
-
-'''score_dict = nlp_stars_sentiment("Smaller jar, no peanut butter all over my fingers and wrists. Fresher. Was buying larger jars to get better pricing, but so messy trying to get it out near middle to end. Plus can be weeks before I eat again. This is less messy and still cost effective. I prefer Skippy, but I like this as 2nd choice.")'''
-
-'''print(score_dict[0])'''
+import joblib
+import sklearn
+from praw.models import MoreComments
 
 reddit = praw.Reddit('sentimentBot')
+review_clf = joblib.load('review_clf.joblib')
 
 all = reddit.subreddit("all")
-amazon_reviews = reddit.subreddit("amazonreviews")
 
-for submission in amazon_reviews.new(limit=3):
-    print("title:" + submission.title)
-    submission.comments.replace_more()
-    for comment in submission.comments.list():
-        print("Comment Body: " + comment.body)
-        print(nlp_stars_sentiment(comment.body))
+searchTerm = 'pizza' # Get search term from form submit POST
 
-print(nlp_stars_sentiment("The tire shop was great.  The service was very helpful.  I did not like that I had to wait a little long, but overall it was good."))
+positive_count = 0
+negative_count = 0
 
+all = reddit.subreddit("all")
 
-'''for submission in reddit.subreddit('all').hot(limit=10):
-    submission_dict = nlp_stars_sentiment(submission.title)
-    print(submission.title)
-    print(submission_dict[0])'''
+for submission in all.search(searchTerm, limit=50):
+    data_list = []
+    data_list.append(submission.title)
+    print("Post title: " + submission.title)
+    prediction = review_clf.predict(data_list)
+    output = prediction[0]
+    if (output.item() == 1):
+        positive_count += 1
+    else:
+        negative_count += 1
+
+print("Positive Count: " + str(positive_count))
+print("Negative Count: " + str(negative_count))
